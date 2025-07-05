@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fabric.js Line Drawing</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    #canvas-container { margin: 30px auto; width: 800px; }
+    canvas { border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h2>Fabric.js Line Drawing Example</h2>
+  <button id="toggle-mode">Switch to Select/Customize Mode</button>
+  <span id="mode-label">Current Mode: Draw Line</span>
+  <div id="canvas-container">
+    <canvas id="c" width="800" height="500"></canvas>
+  </div>
+  <!-- Fabric.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+  <script>
+    // Initialize Fabric.js canvas
+    const canvas = new fabric.Canvas('c');
+
+    let isDrawing = false;
+    let line, startX, startY;
+    let drawMode = true; // true = Draw Line, false = Select/Customize
+
+    const toggleBtn = document.getElementById('toggle-mode');
+    const modeLabel = document.getElementById('mode-label');
+
+    toggleBtn.addEventListener('click', function() {
+      drawMode = !drawMode;
+      if (drawMode) {
+        toggleBtn.textContent = 'Switch to Select/Customize Mode';
+        modeLabel.textContent = 'Current Mode: Draw Line';
+        canvas.selection = false;
+        canvas.discardActiveObject();
+      } else {
+        toggleBtn.textContent = 'Switch to Draw Line Mode';
+        modeLabel.textContent = 'Current Mode: Select/Customize';
+        canvas.selection = true;
+      }
+      canvas.renderAll();
+    });
+
+    canvas.on('mouse:down', function(o) {
+      if (!drawMode) return; // Only draw in draw mode
+      isDrawing = true;
+      const pointer = canvas.getPointer(o.e);
+      startX = pointer.x;
+      startY = pointer.y;
+      line = new fabric.Line([startX, startY, startX, startY], {
+        stroke: 'black',
+        strokeWidth: 2,
+        selectable: true,
+        evented: true
+      });
+      canvas.add(line);
+    });
+
+    canvas.on('mouse:move', function(o) {
+      if (!drawMode || !isDrawing) return;
+      const pointer = canvas.getPointer(o.e);
+      line.set({ x2: pointer.x, y2: pointer.y });
+      canvas.renderAll();
+    });
+
+    canvas.on('mouse:up', function(o) {
+      if (!drawMode) return;
+      isDrawing = false;
+      if (line) line.setCoords();
+    });
+  </script>
+</body>
+</html> 
