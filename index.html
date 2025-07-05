@@ -12,6 +12,10 @@
 </head>
 <body>
   <h2>Fabric.js Line Drawing Example</h2>
+  <div style="margin-bottom: 10px;">
+    <label>Line Color: <input type="color" id="line-color" value="#000000"></label>
+    <label>Line Width: <input type="number" id="line-width" value="2" min="1" max="10" style="width: 50px;"></label>
+  </div>
   <button id="toggle-mode">Switch to Select/Customize Mode</button>
   <span id="mode-label">Current Mode: Draw Line</span>
   <div id="canvas-container">
@@ -29,6 +33,29 @@
 
     const toggleBtn = document.getElementById('toggle-mode');
     const modeLabel = document.getElementById('mode-label');
+    const colorInput = document.getElementById('line-color');
+    const widthInput = document.getElementById('line-width');
+
+    let currentColor = colorInput.value;
+    let currentWidth = parseInt(widthInput.value, 10);
+
+    colorInput.addEventListener('input', function() {
+      currentColor = colorInput.value;
+      // If in select mode and a line is selected, update its color
+      if (!drawMode && canvas.getActiveObject() && canvas.getActiveObject().type === 'line') {
+        canvas.getActiveObject().set('stroke', currentColor);
+        canvas.requestRenderAll();
+      }
+    });
+
+    widthInput.addEventListener('input', function() {
+      currentWidth = parseInt(widthInput.value, 10);
+      // If in select mode and a line is selected, update its width
+      if (!drawMode && canvas.getActiveObject() && canvas.getActiveObject().type === 'line') {
+        canvas.getActiveObject().set('strokeWidth', currentWidth);
+        canvas.requestRenderAll();
+      }
+    });
 
     toggleBtn.addEventListener('click', function() {
       drawMode = !drawMode;
@@ -52,8 +79,8 @@
       startX = pointer.x;
       startY = pointer.y;
       line = new fabric.Line([startX, startY, startX, startY], {
-        stroke: 'black',
-        strokeWidth: 2,
+        stroke: currentColor,
+        strokeWidth: currentWidth,
         selectable: true,
         evented: true
       });
