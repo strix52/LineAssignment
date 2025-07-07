@@ -101,15 +101,13 @@ deleteSelectedBtn.addEventListener('click', function() {
     }
 });
 
-
-
 // Console log for debugging - shows line coordinates
 canvas.on('selection:created', function(e) {
     const selectedObject = e.selected[0];
     if (selectedObject && selectedObject.type === 'line') {
-        console.log('Selected line coordinates:');
-        console.log('Start: (' + selectedObject.x1 + ', ' + selectedObject.y1 + ')');
-        console.log('End: (' + selectedObject.x2 + ', ' + selectedObject.y2 + ')');
+        // console.log('Selected line coordinates:');
+        // console.log('Start: (' + selectedObject.x1 + ', ' + selectedObject.y1 + ')');
+        // console.log('End: (' + selectedObject.x2 + ', ' + selectedObject.y2 + ')');
     }
 });
 
@@ -117,8 +115,8 @@ canvas.on('selection:created', function(e) {
 canvas.on('object:modified', function(e) {
     const modifiedObject = e.target;
     if (modifiedObject && modifiedObject.type === 'line') {
-        console.log('Line modified - New coordinates:');
-        console.log('Start: (' + modifiedObject.x1 + ', ' + modifiedObject.y1 + ')');
-        console.log('End: (' + modifiedObject.x2 + ', ' + modifiedObject.y2 + ')');
+        // console.log('Line modified - New coordinates:');
+        // console.log('Start: (' + modifiedObject.x1 + ', ' + modifiedObject.y1 + ')');
+        // console.log('End: (' + modifiedObject.x2 + ', ' + modifiedObject.y2 + ')');
     }
 }); 
