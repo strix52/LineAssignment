@@ -13,6 +13,7 @@ const strokeColorInput = document.getElementById('strokeColor');
 const strokeWidthInput = document.getElementById('strokeWidth');
 const clearCanvasBtn = document.getElementById('clearCanvas');
 const deleteSelectedBtn = document.getElementById('deleteSelected');
+const dashedLineInput = document.getElementById('dashedLine');
 
 // Mouse down event - start drawing
 canvas.on('mouse:down', function(options) {
@@ -32,7 +33,9 @@ canvas.on('mouse:down', function(options) {
             hasControls: true,
             hasBorders: true,
             originX: 'center',
-            originY: 'center'
+            originY: 'center',
+            strokeDashArray:dashedLineInput.checked ? [10, 5] : null
+            
         });
         
         canvas.add(currentLine);
@@ -101,6 +104,13 @@ deleteSelectedBtn.addEventListener('click', function() {
     }
 });
 
+dashedLineInput.addEventListener('change', function() {
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject.type === 'line') {
+        activeObject.set('strokeDashArray', dashedLineInput.checked ? [10, 5] : null);
+        canvas.renderAll();
+    }
+});
 // Console log for debugging - shows line coordinates
 canvas.on('selection:created', function(e) {
     const selectedObject = e.selected[0];
