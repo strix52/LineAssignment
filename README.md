@@ -21,6 +21,7 @@ A modern, responsive drawing application built with FabricJS that lets you creat
 - **Width Slider** - Adjust line thickness (1-20px)
 - **Shape Selection** - Switch between different drawing modes
 - **Dashed Toggle** - Make any line dashed or solid
+- **Coordinate Editor** - Precise numerical control over line positioning
 
 ### 📱 Responsive Design  
 - **Adaptive Canvas** - Automatically resizes to fit your screen
@@ -41,6 +42,15 @@ A modern, responsive drawing application built with FabricJS that lets you creat
 2. **Move it** by dragging
 3. **Resize it** using the corner handles
 4. **Change properties** using the controls (color, width, dashed)
+
+### Precise Coordinate Editing
+1. **Select a drawn line** to open the coordinate popup
+2. **Edit coordinates** directly using numerical inputs:
+   - **X1, Y1** - Starting point coordinates
+   - **X2, Y2** - Ending point coordinates
+   - **Control Points** - Additional curve controls for curved/Bezier lines
+3. **Click Update** to apply changes (popup stays open for multiple adjustments)
+4. **Click Close** or deselect the line to hide the popup
 
 ### Converting Shapes
 1. **Select a shape** you want to convert
@@ -93,8 +103,10 @@ The canvas automatically adapts its size based on:
 ## 💡 Tips & Tricks
 
 - **Try shape conversion** - Draw a straight line, then convert it to curved or bezier
+- **Use coordinate editing** - Select any line for precise numerical positioning
 - **Use L-shapes** for technical drawings or architectural sketches
 - **Make dashed lines** for guidelines or construction marks
+- **Fine-tune curves** - Use coordinate editing to adjust control points on curved lines
 - **Resize your browser** to see the responsive canvas in action
 - **Mobile drawing** works great - try it on your tablet!
 
@@ -108,4 +120,4 @@ The canvas automatically adapts its size based on:
 
 ---
 
-Built with ❤️ using [FabricJS](http://fabricjs.com/) - A powerful HTML5 canvas library 
+Built using [FabricJS](http://fabricjs.com/) - A powerful HTML5 canvas library 

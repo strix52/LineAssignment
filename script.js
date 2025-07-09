@@ -330,14 +330,7 @@ convertToDropdown.addEventListener('change', function() {
     }
 });
 
-canvas.on('selection:created', function(e) {
-    const selectedObject = e.selected[0];
-    if (selectedObject && selectedObject.type === 'line') {
-        // console.log('Selected line coordinates:');
-        // console.log('Start: (' + selectedObject.x1 + ', ' + selectedObject.y1 + ')');
-        // console.log('End: (' + selectedObject.x2 + ', ' + selectedObject.y2 + ')');
-    }
-});
+// Note: This event handler is now handled by the coordinate controls section below
 
 canvas.on('object:modified', function(e) {
     const modifiedObject = e.target;
@@ -346,4 +339,204 @@ canvas.on('object:modified', function(e) {
         // console.log('Start: (' + modifiedObject.x1 + ', ' + modifiedObject.y1 + ')');
         // console.log('End: (' + modifiedObject.x2 + ', ' + modifiedObject.y2 + ')');
     }
-}); 
+});
+
+// Simple coordinate popup
+let selectedLineForPopup = null;
+let isUpdatingLine = false;
+
+// Show popup on line selection
+canvas.on('selection:created', function(e) {
+    if (isUpdatingLine) return; // Don't interfere during updates
+    const selectedObject = e.selected[0];
+    if (selectedObject && (selectedObject.type === 'line' || selectedObject.type === 'path' || selectedObject.type === 'group')) {
+        selectedLineForPopup = selectedObject;
+        // Position popup at center of canvas since we don't have mouse position here
+        const canvasRect = canvas.upperCanvasEl.getBoundingClientRect();
+        showCoordinatePopup(canvasRect.left + 50, canvasRect.top + 50, selectedLineForPopup);
+    }
+});
+
+canvas.on('selection:cleared', function(e) {
+    if (isUpdatingLine) return; // Don't close popup during updates
+    closePopup();
+});
+
+canvas.on('selection:updated', function(e) {
+    if (isUpdatingLine) return; // Don't interfere during updates
+    const selectedObject = e.selected[0];
+    if (selectedObject && (selectedObject.type === 'line' || selectedObject.type === 'path' || selectedObject.type === 'group')) {
+        selectedLineForPopup = selectedObject;
+        const canvasRect = canvas.upperCanvasEl.getBoundingClientRect();
+        showCoordinatePopup(canvasRect.left + 50, canvasRect.top + 50, selectedLineForPopup);
+    } else {
+        closePopup();
+    }
+});
+
+function showCoordinatePopup(x, y, lineObj) {
+    const popup = document.getElementById('coordinatePopup');
+    const curveInputs = document.getElementById('curveInputs');
+    const bezierInputs = document.getElementById('bezierInputs');
+    
+    // Position popup near click
+    popup.style.left = (x + 10) + 'px';
+    popup.style.top = (y + 10) + 'px';
+    popup.style.display = 'block';
+    
+    // Hide curve controls initially
+    curveInputs.style.display = 'none';
+    bezierInputs.style.display = 'none';
+    
+    // Populate based on line type
+    if (lineObj.shapeType === 'straight') {
+        document.getElementById('popupX1').value = lineObj.x1.toFixed(1);
+        document.getElementById('popupY1').value = lineObj.y1.toFixed(1);
+        document.getElementById('popupX2').value = lineObj.x2.toFixed(1);
+        document.getElementById('popupY2').value = lineObj.y2.toFixed(1);
+    } else if (lineObj.shapeType === 'curved') {
+        const coords = getPathCoordinates(lineObj);
+        document.getElementById('popupX1').value = coords.startX.toFixed(1);
+        document.getElementById('popupY1').value = coords.startY.toFixed(1);
+        document.getElementById('popupX2').value = coords.endX.toFixed(1);
+        document.getElementById('popupY2').value = coords.endY.toFixed(1);
+        document.getElementById('popupCP1X').value = coords.cp1X.toFixed(1);
+        document.getElementById('popupCP1Y').value = coords.cp1Y.toFixed(1);
+        curveInputs.style.display = 'block';
+    } else if (lineObj.shapeType === 'bezier') {
+        const coords = getPathCoordinates(lineObj);
+        document.getElementById('popupX1').value = coords.startX.toFixed(1);
+        document.getElementById('popupY1').value = coords.startY.toFixed(1);
+        document.getElementById('popupX2').value = coords.endX.toFixed(1);
+        document.getElementById('popupY2').value = coords.endY.toFixed(1);
+        document.getElementById('popupCP1X').value = coords.cp1X.toFixed(1);
+        document.getElementById('popupCP1Y').value = coords.cp1Y.toFixed(1);
+        document.getElementById('popupCP2X').value = coords.cp2X.toFixed(1);
+        document.getElementById('popupCP2Y').value = coords.cp2Y.toFixed(1);
+        curveInputs.style.display = 'block';
+        bezierInputs.style.display = 'block';
+    } else if (lineObj.shapeType === 'lshape') {
+        const lines = lineObj.getObjects();
+        if (lines.length >= 2) {
+            document.getElementById('popupX1').value = lines[0].x1.toFixed(1);
+            document.getElementById('popupY1').value = lines[0].y1.toFixed(1);
+            document.getElementById('popupX2').value = lines[1].x2.toFixed(1);
+            document.getElementById('popupY2').value = lines[1].y2.toFixed(1);
+        }
+    }
+}
+
+function closePopup() {
+    document.getElementById('coordinatePopup').style.display = 'none';
+    selectedLineForPopup = null;
+}
+
+function updateSelectedLine() {
+    if (!selectedLineForPopup) return;
+    
+    const x1 = parseFloat(document.getElementById('popupX1').value);
+    const y1 = parseFloat(document.getElementById('popupY1').value);
+    const x2 = parseFloat(document.getElementById('popupX2').value);
+    const y2 = parseFloat(document.getElementById('popupY2').value);
+    
+    if (selectedLineForPopup.shapeType === 'straight') {
+        selectedLineForPopup.set({ x1: x1, y1: y1, x2: x2, y2: y2 });
+        selectedLineForPopup.setCoords();
+    } else if (selectedLineForPopup.shapeType === 'curved') {
+        const cp1X = parseFloat(document.getElementById('popupCP1X').value);
+        const cp1Y = parseFloat(document.getElementById('popupCP1Y').value);
+        updateCurvedLine(x1, y1, x2, y2, cp1X, cp1Y);
+    } else if (selectedLineForPopup.shapeType === 'bezier') {
+        const cp1X = parseFloat(document.getElementById('popupCP1X').value);
+        const cp1Y = parseFloat(document.getElementById('popupCP1Y').value);
+        const cp2X = parseFloat(document.getElementById('popupCP2X').value);
+        const cp2Y = parseFloat(document.getElementById('popupCP2Y').value);
+        updateBezierLine(x1, y1, x2, y2, cp1X, cp1Y, cp2X, cp2Y);
+    } else if (selectedLineForPopup.shapeType === 'lshape') {
+        const lines = selectedLineForPopup.getObjects();
+        if (lines.length >= 2) {
+            const midX = lines[0].x2;
+            const midY = lines[0].y2;
+            lines[0].set({ x1: x1, y1: y1, x2: midX, y2: midY });
+            lines[1].set({ x1: midX, y1: midY, x2: x2, y2: y2 });
+            selectedLineForPopup.addWithUpdate();
+        }
+    }
+    
+    canvas.renderAll();
+    // Keep popup open for multiple edits - don't call closePopup()
+}
+
+function updateCurvedLine(startX, startY, endX, endY, cpX, cpY) {
+    isUpdatingLine = true; // Prevent selection events from interfering
+    
+    const pathString = `M ${startX} ${startY} Q ${cpX} ${cpY} ${endX} ${endY}`;
+    const newPath = new fabric.Path(pathString, {
+        stroke: selectedLineForPopup.stroke,
+        strokeWidth: selectedLineForPopup.strokeWidth,
+        fill: '',
+        selectable: true,
+        evented: true,
+        hasControls: true,
+        hasBorders: true,
+        strokeDashArray: selectedLineForPopup.strokeDashArray
+    });
+    
+    newPath.shapeType = 'curved';
+    canvas.remove(selectedLineForPopup);
+    canvas.add(newPath);
+    canvas.setActiveObject(newPath);  // Keep the new object selected
+    selectedLineForPopup = newPath;
+    
+    isUpdatingLine = false; // Re-enable selection events
+}
+
+function updateBezierLine(startX, startY, endX, endY, cp1X, cp1Y, cp2X, cp2Y) {
+    isUpdatingLine = true; // Prevent selection events from interfering
+    
+    const pathString = `M ${startX} ${startY} C ${cp1X} ${cp1Y} ${cp2X} ${cp2Y} ${endX} ${endY}`;
+    const newPath = new fabric.Path(pathString, {
+        stroke: selectedLineForPopup.stroke,
+        strokeWidth: selectedLineForPopup.strokeWidth,
+        fill: '',
+        selectable: true,
+        evented: true,
+        hasControls: true,
+        hasBorders: true,
+        strokeDashArray: selectedLineForPopup.strokeDashArray
+    });
+    
+    newPath.shapeType = 'bezier';
+    canvas.remove(selectedLineForPopup);
+    canvas.add(newPath);
+    canvas.setActiveObject(newPath);  // Keep the new object selected
+    selectedLineForPopup = newPath;
+    
+    isUpdatingLine = false; // Re-enable selection events
+}
+
+function getPathCoordinates(path) {
+    const pathArray = path.path;
+    const coords = {};
+    
+    if (pathArray[0][0] === 'M') {
+        coords.startX = pathArray[0][1];
+        coords.startY = pathArray[0][2];
+    }
+    
+    if (pathArray[1][0] === 'Q') {
+        coords.cp1X = pathArray[1][1];
+        coords.cp1Y = pathArray[1][2];
+        coords.endX = pathArray[1][3];
+        coords.endY = pathArray[1][4];
+    } else if (pathArray[1][0] === 'C') {
+        coords.cp1X = pathArray[1][1];
+        coords.cp1Y = pathArray[1][2];
+        coords.cp2X = pathArray[1][3];
+        coords.cp2Y = pathArray[1][4];
+        coords.endX = pathArray[1][5];
+        coords.endY = pathArray[1][6];
+    }
+    
+    return coords;
+} 

@@ -141,4 +141,46 @@ button:hover {
         align-items: stretch;
         gap: 8px;
     }
+}
+
+/* Simple Coordinate Popup */
+#coordinatePopup {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 1000;
+    font-size: 12px;
+}
+
+#coordinatePopup label {
+    font-size: 12px;
+    margin-right: 5px;
+    min-width: auto;
+}
+
+#coordinatePopup input {
+    width: 60px;
+    margin: 2px 0 4px 5px;
+    padding: 2px 4px;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    font-size: 11px;
+}
+
+#coordinatePopup button {
+    margin: 8px 4px 0 0;
+    padding: 4px 8px;
+    font-size: 11px;
+    background: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#coordinatePopup button:hover {
+    background: #3367d6;
 } 

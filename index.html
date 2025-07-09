@@ -51,6 +51,25 @@
             </div>
         </div>
     </div>
+
+    <!-- Simple coordinate popup -->
+    <div id="coordinatePopup" style="display: none;">
+        <label>X1: <input type="number" id="popupX1" step="0.1" /></label><br>
+        <label>Y1: <input type="number" id="popupY1" step="0.1" /></label><br>
+        <label>X2: <input type="number" id="popupX2" step="0.1" /></label><br>
+        <label>Y2: <input type="number" id="popupY2" step="0.1" /></label><br>
+        <div id="curveInputs" style="display: none;">
+            <label>CP1 X: <input type="number" id="popupCP1X" step="0.1" /></label><br>
+            <label>CP1 Y: <input type="number" id="popupCP1Y" step="0.1" /></label><br>
+            <div id="bezierInputs" style="display: none;">
+                <label>CP2 X: <input type="number" id="popupCP2X" step="0.1" /></label><br>
+                <label>CP2 Y: <input type="number" id="popupCP2Y" step="0.1" /></label><br>
+            </div>
+        </div>
+        <button onclick="updateSelectedLine()">Update</button>
+        <button onclick="closePopup()">Close</button>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
     <script src="script.js"></script>
 </body>
